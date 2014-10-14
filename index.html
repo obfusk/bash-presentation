@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type"
+      content="text/html; charset=utf-8" />
+    <title>Bash scripting</title>
+    <style type="text/css">
+      body { font-family: sans-serif; font-size: 20px; }
+      .small { font-size: 0.6em; }
+      .remark-inline-code { background-color: rgba(0, 0, 0, 0.04); }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# Bash scripting
+
+"The Bourne-again shell"
+
+Felix C. Stegerman `<flx@obfusk.net>`
+
+.small[2014-10-14]
+
+---
+
+### What bash is
+
+Being a UNIX shell, bash is an interactive command language as well as
+a scripting programming language.
+
+### What bash isn't
+
+Unfortunately, bash is not quite on par with most general-purpose
+programming languages.
+
+### Careful!
+
+Be careful with special characters (and spaces).
+
+And don't type e.g.  `rm -rf * /` (instead of the intended `rm -rf */`).
+
+### Bourne shell
+
+NB: `/bin/sh != /bin/bash` (unless it is).
+
+---
+
+### Some fun stuff
+
+* `~/.bashrc`, `~/.profile`
+* `$PS1`, `alias`
+* `shopt`, `set -e`, `set -n`, `set -v`, `set +x`
+
+<!-- -->
+
+* `/proc`, `/dev` (everything's a file)
+* `/etc/init.d/*`
+
+```bash
+sed 's!foo!bar!g' -i some_file
+```
+
+```bash
+mount | grep ^/ | awk '{ print $1 }'
+```
+
+---
+
+#### Software Tools Principles
+
+* Do one thing well.
+* Process lines of text, not binary.
+* Use regular expressions.
+* Default to standard I/O.
+* Don't be chatty.
+* Generate the same output format as accepted as input.
+* Let someone else do the hard part.
+* Detour to build specialized tools.
+
+#### The UNIX Philosophy (Mike Gancarz)
+
+* Small is beautiful.
+* Make each program do one thing well.
+* Build a prototype as soon as possible.
+* Choose portability over efficiency.
+* Store data in flat text files.
+* Use software leverage to your advantage.
+* Use shell scripts to increase leverage and portability.
+* Avoid captive user interfaces.
+* Make every program a filter.
+
+---
+
+## A shell script
+
+```bash
+#!/bin/bash
+echo "Hello, World!"
+```
+
+---
+
+## Being funny
+
+```bash
+say_hi () { echo "Hi, $1!"; }
+say_hi Bob
+```
+
+---
+
+## Being optional
+
+```bash
+#!/bin/bash
+set -e
+
+foo=/some/file bar=42
+
+usage () { echo 'myscript [-f FOO] [-b BAR]' >&2; exit 1; }
+
+while getopts :f:b: opt; do
+  case "$opt" in
+    f)  foo="$OPTARG" ;;
+    b)  bar="$OPTARG" ;;
+    :)  echo "missing argument for: -$OPTARG" >&2; usage ;;
+    \?) echo "invalid option: -$OPTARG"       >&2; usage ;;
+  esac
+done
+
+[ "$OPTIND" -gt "$#" ] || usage
+
+cleanup () { echo 'cleaning up...'; }
+trap cleanup EXIT
+
+do_something_with "$foo" "$bar"
+```
+
+---
+
+## Being selective
+
+```bash
+select choice in FOO BAR BAZ; do
+  if [ -n "$choice" ]; then
+    echo "You chose: $choice"
+    break
+  else
+    echo 'You need to choose!'
+  fi
+done
+```
+
+---
+
+## Being amphibian
+
+```bash
+whiptail --inputbox -- "What is your name?" 10 60 2> /tmp/your_name
+```
+
+---
+
+## Being amphibian w/ eft.sh
+
+```bash
+say_hi () { echo "Hello, $1!"; }
+eft_ask 'What is your name?' on_ok=say_hi
+```
+
+---
+
+## Being zen
+
+```bash
+zenity --warning --text "OOPS"
+
+zenity --file-selection --title 'Which file?'
+```
+
+---
+
+## Being functional w/ map.sh
+
+```bash
+map -v 'echo "$it"; echo ${#it}' foo 'bar baz'
+# ==> echo foo
+# foo
+# ==> echo 3
+# 3
+# ==> echo 'bar baz'
+# bar baz
+# ==> echo 7
+# 7
+
+# find files and echo dirname of canonical path
+find -type f -print0 | sort -z | map -f0 'echo "$path_dir"'
+
+# find 4-char files
+find -type f -print0 | sort -z | filter -f0 '[ "${#base}" == 4 ]'
+```
+
+---
+
+class: center, middle
+
+## Being a taskmaster
+
+---
+
+## Being a time lord
+
+```bash
+view /etc/crontab
+
+crontab -l
+crontab -e
+```
+
+---
+
+class: center, middle
+
+## Being a find wizard
+
+---
+
+class: center, middle
+
+## Being a bit sed (sic)
+
+---
+
+class: center, middle
+
+## Being on the screen
+
+---
+
+class: center, middle
+
+## Being asked questions
+
+---
+
+# Links
+
+* https://github.com/obfusk/eft.sh
+* https://github.com/obfusk/map.sh
+* https://github.com/obfusk/taskmaster
+
+    </textarea>
+    <script src="remark-0.7.0.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
+<!-- vim: set tw=70 sw=2 sts=2 et ft=mkd : -->
